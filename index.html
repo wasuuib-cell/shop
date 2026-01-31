@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sana - නිෂ්පාදන</title>
+    <title>Sana - Shopping</title>
     <style>
         * {
             margin: 0;
@@ -23,11 +23,13 @@
             margin: 0 auto;
         }
 
+        /* Header Styles */
         header {
             text-align: center;
             color: white;
             margin-bottom: 40px;
             animation: fadeInDown 0.8s ease;
+            position: relative;
         }
 
         header h1 {
@@ -41,6 +43,186 @@
             opacity: 0.9;
         }
 
+        /* Login/User Info Bar */
+        .user-bar {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-login, .btn-logout, .btn-cart {
+            background: white;
+            color: #667eea;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login:hover, .btn-logout:hover, .btn-cart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+        }
+
+        .btn-cart {
+            position: relative;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-header h2 {
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            color: #999;
+        }
+
+        .btn-google {
+            width: 100%;
+            padding: 15px;
+            background: white;
+            color: #333;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-google:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        /* Products Grid */
         .products-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -72,7 +254,6 @@
             justify-content: center;
             color: white;
             font-size: 1.2rem;
-            position: relative;
         }
 
         .product-image img {
@@ -99,23 +280,6 @@
             margin-bottom: 15px;
         }
 
-        .product-link {
-            display: inline-block;
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-
-        .product-link:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
         .product-description {
             color: #666;
             line-height: 1.6;
@@ -123,20 +287,94 @@
             font-size: 0.95rem;
         }
 
+        .btn-add-cart {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add-cart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Cart Styles */
+        .cart-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            align-items: center;
+        }
+
+        .cart-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-price {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .btn-remove {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-remove:hover {
+            background: #e84118;
+        }
+
+        .cart-total {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .cart-total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
         .loading {
             text-align: center;
             color: white;
             font-size: 1.5rem;
-            margin-top: 50px;
-        }
-
-        .no-products {
-            text-align: center;
-            color: white;
-            font-size: 1.3rem;
-            background: rgba(255,255,255,0.1);
-            padding: 40px;
-            border-radius: 20px;
             margin-top: 50px;
         }
 
@@ -177,6 +415,17 @@
             }
         }
 
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         @media (max-width: 768px) {
             header h1 {
                 font-size: 2rem;
@@ -184,6 +433,12 @@
 
             .products-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .user-bar {
+                position: relative;
+                justify-content: center;
+                margin-top: 20px;
             }
         }
     </style>
@@ -193,6 +448,10 @@
         <header>
             <h1 id="businessTitle">🛍️ Sana</h1>
             <p>අපගේ නවතම නිෂ්පාදන</p>
+            
+            <div class="user-bar" id="userBar">
+                <!-- Dynamic content loaded by JavaScript -->
+            </div>
         </header>
 
         <div id="loading" class="loading">
@@ -203,11 +462,79 @@
         <div id="productsContainer" class="products-grid"></div>
     </div>
 
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔐 Login</h2>
+                <button class="close-btn" onclick="closeLoginModal()">&times;</button>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>නම</label>
+                    <input type="text" id="userName" required placeholder="ඔබේ නම">
+                </div>
+                
+                <div class="form-group">
+                    <label>WhatsApp Number</label>
+                    <input type="tel" id="userWhatsapp" required placeholder="07XXXXXXXX">
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="userPhone" required placeholder="07XXXXXXXX">
+                </div>
+                
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="userEmail" required placeholder="example@email.com">
+                </div>
+                
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+            
+            <div class="divider">හෝ</div>
+            
+            <button class="btn-google" onclick="loginWithGoogle()">
+                <svg width="20" height="20" viewBox="0 0 20 20">
+                    <path fill="#4285F4" d="M19.6 10.23c0-.82-.1-1.42-.25-2.05H10v3.72h5.5c-.15.96-.74 2.31-2.04 3.22v2.45h3.16c1.89-1.73 2.98-4.3 2.98-7.34z"/>
+                    <path fill="#34A853" d="M13.46 15.13c-.83.59-1.96 1-3.46 1-2.64 0-4.88-1.74-5.68-4.15H1.07v2.52C2.72 17.75 6.09 20 10 20c2.7 0 4.96-.89 6.62-2.42l-3.16-2.45z"/>
+                    <path fill="#FBBC05" d="M3.99 10c0-.69.12-1.35.32-1.97V5.51H1.07A9.973 9.973 0 000 10c0 1.61.39 3.14 1.07 4.49l3.24-2.52c-.2-.62-.32-1.28-.32-1.97z"/>
+                    <path fill="#EA4335" d="M10 3.88c1.88 0 3.13.81 3.85 1.48l2.84-2.76C14.96.99 12.7 0 10 0 6.09 0 2.72 2.25 1.07 5.51l3.24 2.52C5.12 5.62 7.36 3.88 10 3.88z"/>
+                </svg>
+                Google එකින් Login වන්න
+            </button>
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🛒 Shopping Cart</h2>
+                <button class="close-btn" onclick="closeCartModal()">&times;</button>
+            </div>
+            
+            <div id="cartItems"></div>
+            
+            <div class="cart-total" id="cartTotal" style="display: none;">
+                <div class="cart-total-row">
+                    <span>මුළු එකතුව:</span>
+                    <span id="totalAmount">Rs. 0</span>
+                </div>
+                <button class="btn-primary" onclick="placeOrder()" style="margin-top: 20px;">
+                    🛍️ Order කරන්න
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
-        // IMPORTANT: වැරදි URL එක නැහැ!
         const firebaseConfig = {
             apiKey: "AIzaSyDY2dVr2B2AN5nGCWZy-iNmYm19G2nkQnA",
             authDomain: "sana-1c57d.firebaseapp.com",
@@ -221,6 +548,11 @@
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+        let cart = [];
+        let products = {};
 
         // Load business name
         const businessNameRef = ref(database, 'settings/businessName');
@@ -229,8 +561,187 @@
             document.getElementById('businessTitle').innerHTML = `🛍️ ${businessName}`;
         });
 
-        const productsRef = ref(database, 'products');
+        // Auth state observer
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                updateUserBar();
+            } else {
+                currentUser = null;
+                updateUserBar();
+            }
+        });
 
+        // Update user bar
+        function updateUserBar() {
+            const userBar = document.getElementById('userBar');
+            
+            if (currentUser) {
+                const userName = currentUser.displayName || currentUser.email || 'User';
+                userBar.innerHTML = `
+                    <div class="user-info">👤 ${userName}</div>
+                    <button class="btn-cart" onclick="openCartModal()">
+                        🛒 Cart
+                        ${cart.length > 0 ? `<span class="cart-badge">${cart.length}</span>` : ''}
+                    </button>
+                    <button class="btn-logout" onclick="logout()">Logout</button>
+                `;
+            } else {
+                userBar.innerHTML = `
+                    <button class="btn-login" onclick="openLoginModal()">Login</button>
+                `;
+            }
+        }
+
+        // Login functions
+        window.openLoginModal = function() {
+            document.getElementById('loginModal').classList.add('active');
+        };
+
+        window.closeLoginModal = function() {
+            document.getElementById('loginModal').classList.remove('active');
+        };
+
+        window.loginWithGoogle = async function() {
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                currentUser = result.user;
+                closeLoginModal();
+                alert('✅ Successfully logged in!');
+            } catch (error) {
+                alert('❌ Login failed: ' + error.message);
+            }
+        };
+
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                cart = [];
+                alert('✅ Logged out successfully!');
+            } catch (error) {
+                alert('❌ Logout failed: ' + error.message);
+            }
+        };
+
+        // Manual login form
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userData = {
+                name: document.getElementById('userName').value,
+                whatsapp: document.getElementById('userWhatsapp').value,
+                phone: document.getElementById('userPhone').value,
+                email: document.getElementById('userEmail').value
+            };
+
+            // Store in localStorage for manual login
+            localStorage.setItem('userData', JSON.stringify(userData));
+            currentUser = { displayName: userData.name, email: userData.email };
+            
+            closeLoginModal();
+            updateUserBar();
+            alert('✅ Successfully logged in!');
+        });
+
+        // Cart functions
+        window.openCartModal = function() {
+            if (!currentUser) {
+                openLoginModal();
+                return;
+            }
+            updateCartDisplay();
+            document.getElementById('cartModal').classList.add('active');
+        };
+
+        window.closeCartModal = function() {
+            document.getElementById('cartModal').classList.remove('active');
+        };
+
+        window.addToCart = function(productId) {
+            if (!currentUser) {
+                openLoginModal();
+                return;
+            }
+
+            const product = products[productId];
+            if (product) {
+                cart.push({ ...product, id: productId });
+                updateUserBar();
+                alert('✅ බඩුව cart එකට එකතු කරන ලදී!');
+            }
+        };
+
+        window.removeFromCart = function(index) {
+            cart.splice(index, 1);
+            updateCartDisplay();
+            updateUserBar();
+        };
+
+        function updateCartDisplay() {
+            const cartItemsDiv = document.getElementById('cartItems');
+            const cartTotalDiv = document.getElementById('cartTotal');
+            
+            if (cart.length === 0) {
+                cartItemsDiv.innerHTML = '<div class="empty-cart">Cart එක හිස්!</div>';
+                cartTotalDiv.style.display = 'none';
+                return;
+            }
+
+            let total = 0;
+            let html = '';
+            
+            cart.forEach((item, index) => {
+                const price = parseFloat(item.price) || 0;
+                total += price;
+                
+                const imageUrl = getImageUrl(item.image);
+                
+                html += `
+                    <div class="cart-item">
+                        <img src="${imageUrl}" alt="${item.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/%3E%3C/svg%3E'">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-price">Rs. ${price.toLocaleString()}</div>
+                        </div>
+                        <button class="btn-remove" onclick="removeFromCart(${index})">Remove</button>
+                    </div>
+                `;
+            });
+            
+            cartItemsDiv.innerHTML = html;
+            document.getElementById('totalAmount').textContent = `Rs. ${total.toLocaleString()}`;
+            cartTotalDiv.style.display = 'block';
+        }
+
+        window.placeOrder = function() {
+            if (cart.length === 0) return;
+
+            const orderData = {
+                user: currentUser.displayName || currentUser.email,
+                userEmail: currentUser.email,
+                userData: JSON.parse(localStorage.getItem('userData') || '{}'),
+                items: cart,
+                total: cart.reduce((sum, item) => sum + (parseFloat(item.price) || 0), 0),
+                timestamp: Date.now(),
+                status: 'pending'
+            };
+
+            const ordersRef = ref(database, 'orders');
+            push(ordersRef, orderData)
+                .then(() => {
+                    alert('✅ ඔබේ order එක සාර්ථකව submit කරන ලදී!');
+                    cart = [];
+                    closeCartModal();
+                    updateUserBar();
+                })
+                .catch((error) => {
+                    alert('❌ දෝෂයක්: ' + error.message);
+                });
+        };
+
+        // Load products
+        const productsRef = ref(database, 'products');
         onValue(productsRef, (snapshot) => {
             const loadingDiv = document.getElementById('loading');
             const container = document.getElementById('productsContainer');
@@ -239,9 +750,10 @@
             container.innerHTML = '';
 
             const data = snapshot.val();
+            products = data || {};
 
             if (!data || Object.keys(data).length === 0) {
-                container.innerHTML = '<div class="no-products">තවම නිෂ්පාදන එකතු කර නොමැත</div>';
+                container.innerHTML = '<div style="text-align: center; color: white; padding: 40px;">තවම නිෂ්පාදන එකතු කර නොමැත</div>';
                 return;
             }
 
@@ -251,8 +763,9 @@
                 card.className = 'product-card';
                 card.style.animationDelay = `${index * 0.1}s`;
 
-                const imageHtml = product.image 
-                    ? `<img src="${product.image}" alt="${product.name}">`
+                const imageUrl = getImageUrl(product.image);
+                const imageHtml = imageUrl 
+                    ? `<img src="${imageUrl}" alt="${product.name}" onerror="this.parentElement.innerHTML='රූපය පූරණය වීමට නොහැකි විය'">`
                     : `රූපය නැත`;
 
                 card.innerHTML = `
@@ -263,19 +776,33 @@
                         <h2 class="product-name">${product.name || 'නම නැත'}</h2>
                         <div class="product-price">Rs. ${product.price || '0'}</div>
                         ${product.description ? `<p class="product-description">${product.description}</p>` : ''}
-                        <a href="${product.link || '#'}" class="product-link" target="_blank">
-                            තව විස්තර බලන්න →
-                        </a>
+                        <button class="btn-add-cart" onclick="addToCart('${key}')">
+                            🛒 Add to Cart
+                        </button>
                     </div>
                 `;
 
                 container.appendChild(card);
             });
-        }, (error) => {
-            console.error('Error loading products:', error);
-            document.getElementById('loading').innerHTML = 
-                '<div class="no-products">දෝෂයක් ඇතිවිය. කරුණාකර නැවත උත්සාහ කරන්න.</div>';
         });
+
+        function getImageUrl(image) {
+            if (!image) return '';
+            
+            let imageUrl = image;
+            if (imageUrl.includes('dropbox.com')) {
+                imageUrl = imageUrl.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace('?dl=0', '');
+            } else if (imageUrl.includes('drive.google.com')) {
+                const fileId = imageUrl.match(/[-\w]{25,}/);
+                if (fileId) {
+                    imageUrl = `https://drive.google.com/uc?export=view&id=${fileId[0]}`;
+                }
+            }
+            return imageUrl;
+        }
+
+        // Make functions globally accessible
+        window.cart = cart;
     </script>
 </body>
 </html>
