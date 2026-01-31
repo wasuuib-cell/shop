@@ -164,6 +164,55 @@
             transform: scale(1.05);
         }
 
+        .order-card {
+            background: #fff3cd;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 2px solid #ffc107;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ffc107;
+        }
+
+        .order-status {
+            background: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .order-status.pending {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .order-item {
+            padding: 10px;
+            background: white;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .order-user-info {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .order-user-info p {
+            margin: 5px 0;
+            color: #333;
+        }
+
         .image-preview {
             max-width: 100%;
             max-height: 200px;
@@ -305,6 +354,11 @@
                 <h3>📦 දැනට ඇති නිෂ්පාදන</h3>
                 <div id="productsList"></div>
             </div>
+
+            <div class="product-preview" style="margin-top: 40px;">
+                <h3>📋 පාරිභෝගික Orders</h3>
+                <div id="ordersList"></div>
+            </div>
         </div>
     </div>
 
@@ -436,6 +490,78 @@
             });
         });
 
+        // Load and display orders
+        const ordersRef = ref(database, 'orders');
+        onValue(ordersRef, (snapshot) => {
+            const container = document.getElementById('ordersList');
+            container.innerHTML = '';
+
+            const data = snapshot.val();
+            if (!data) {
+                container.innerHTML = '<p style="color: #999;">තවම orders නැත</p>';
+                return;
+            }
+
+            // Convert to array and sort by timestamp (newest first)
+            const ordersArray = Object.keys(data).map(key => ({
+                id: key,
+                ...data[key]
+            })).sort((a, b) => b.timestamp - a.timestamp);
+
+            ordersArray.forEach(order => {
+                const card = document.createElement('div');
+                card.className = 'order-card';
+                
+                const date = new Date(order.timestamp).toLocaleString('si-LK');
+                const total = order.total || 0;
+                
+                let itemsHtml = '';
+                if (order.items && order.items.length > 0) {
+                    order.items.forEach(item => {
+                        itemsHtml += `
+                            <div class="order-item">
+                                <strong>${item.name}</strong> - Rs. ${item.price}
+                            </div>
+                        `;
+                    });
+                }
+
+                const userData = order.userData || {};
+                
+                card.innerHTML = `
+                    <div class="order-header">
+                        <div>
+                            <h4>📦 Order #${order.id.substring(0, 8)}</h4>
+                            <small>${date}</small>
+                        </div>
+                        <span class="order-status ${order.status}">${order.status || 'pending'}</span>
+                    </div>
+                    
+                    <div class="order-user-info">
+                        <h4>👤 පාරිභෝගික තොරතුරු:</h4>
+                        <p><strong>නම:</strong> ${order.user || 'N/A'}</p>
+                        <p><strong>Email:</strong> ${order.userEmail || userData.email || 'N/A'}</p>
+                        <p><strong>WhatsApp:</strong> ${userData.whatsapp || 'N/A'}</p>
+                        <p><strong>Phone:</strong> ${userData.phone || 'N/A'}</p>
+                    </div>
+                    
+                    <div style="margin: 15px 0;">
+                        <h4>🛒 Items:</h4>
+                        ${itemsHtml}
+                    </div>
+                    
+                    <div style="text-align: right; margin-top: 15px; padding-top: 15px; border-top: 2px solid #ffc107;">
+                        <h3>මුළු එකතුව: Rs. ${total.toLocaleString()}</h3>
+                    </div>
+                    
+                    <button class="delete-btn" onclick="deleteOrder('${order.id}')" style="margin-top: 10px;">
+                        🗑️ Order එක මකන්න
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        });
+
         // Delete product
         window.deleteProduct = function(productId) {
             if (confirm('ඔබට මෙම නිෂ්පාදනය මැකීමට අවශ්‍ය බව විශ්වාසද?')) {
@@ -443,6 +569,20 @@
                 remove(productRef)
                     .then(() => {
                         showAlert('✅ නිෂ්පාදනය සාර්ථකව මකා දමන ලදී!', 'success');
+                    })
+                    .catch((error) => {
+                        showAlert('❌ දෝෂයක්: ' + error.message, 'error');
+                    });
+            }
+        };
+
+        // Delete order
+        window.deleteOrder = function(orderId) {
+            if (confirm('ඔබට මෙම order එක මැකීමට අවශ්‍ය බව විශ්වාසද?')) {
+                const orderRef = ref(database, `orders/${orderId}`);
+                remove(orderRef)
+                    .then(() => {
+                        showAlert('✅ Order එක සාර්ථකව මකා දමන ලදී!', 'success');
                     })
                     .catch((error) => {
                         showAlert('❌ දෝෂයක්: ' + error.message, 'error');
