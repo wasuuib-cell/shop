@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sana - නිෂ්පාදන</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            position: relative;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 25px;
+        }
+
+        .product-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            font-size: 1.8rem;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .product-link {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .product-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .product-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-top: 50px;
+        }
+
+        .no-products {
+            text-align: center;
+            color: white;
+            font-size: 1.3rem;
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 20px;
+            margin-top: 50px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 50px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="businessTitle">🛍️ Sana</h1>
+            <p>අපගේ නවතම නිෂ්පාදන</p>
+        </header>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>නිෂ්පාදන පූර්ණය වෙමින්...</p>
+        </div>
+
+        <div id="productsContainer" class="products-grid"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDY2dVr2B2AN5nGCWZy-iNmYm19G2nkQnA",
+            authDomain: "sana-1c57d.firebaseapp.com",
+            databaseURL: "https://sana-1c57d-default-rtdb.firebasebaseio.com",
+            projectId: "sana-1c57d",
+            storageBucket: "sana-1c57d.firebasestorage.app",
+            messagingSenderId: "615159256634",
+            appId: "1:615159256634:web:797e59a5c2535140274703",
+            measurementId: "G-PCB2VFKYCL"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Load business name
+        const businessNameRef = ref(database, 'settings/businessName');
+        onValue(businessNameRef, (snapshot) => {
+            const businessName = snapshot.val() || 'Sana';
+            document.getElementById('businessTitle').innerHTML = `🛍️ ${businessName}`;
+        });
+
+        const productsRef = ref(database, 'products');
+
+        onValue(productsRef, (snapshot) => {
+            const loadingDiv = document.getElementById('loading');
+            const container = document.getElementById('productsContainer');
+            
+            loadingDiv.style.display = 'none';
+            container.innerHTML = '';
+
+            const data = snapshot.val();
+
+            if (!data || Object.keys(data).length === 0) {
+                container.innerHTML = '<div class="no-products">තවම නිෂ්පාදන එකතු කර නොමැත</div>';
+                return;
+            }
+
+            Object.keys(data).forEach((key, index) => {
+                const product = data[key];
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.style.animationDelay = `${index * 0.1}s`;
+
+                const imageHtml = product.image 
+                    ? `<img src="${product.image}" alt="${product.name}">`
+                    : `රූපය නැත`;
+
+                card.innerHTML = `
+                    <div class="product-image">
+                        ${imageHtml}
+                    </div>
+                    <div class="product-info">
+                        <h2 class="product-name">${product.name || 'නම නැත'}</h2>
+                        <div class="product-price">Rs. ${product.price || '0'}</div>
+                        ${product.description ? `<p class="product-description">${product.description}</p>` : ''}
+                        <a href="${product.link || '#'}" class="product-link" target="_blank">
+                            තව විස්තර බලන්න →
+                        </a>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }, (error) => {
+            console.error('Error loading products:', error);
+            document.getElementById('loading').innerHTML = 
+                '<div class="no-products">දෝෂයක් ඇතිවිය. කරුණාකර නැවත උත්සාහ කරන්න.</div>';
+        });
+    </script>
+</body>
+</html>
