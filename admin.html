@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sana - Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .admin-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            animation: slideIn 0.5s ease;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .product-preview {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .product-preview h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .preview-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .preview-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .preview-card p {
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .image-preview.show {
+            display: block;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .link-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .link-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .link-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .admin-panel {
+                padding: 25px;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔧 Admin Panel</h1>
+            <p id="businessNameDisplay">නිෂ්පාදන කළමනාකරණය</p>
+            <div class="link-buttons">
+                <a href="index.html" class="link-btn">🏠 මුල් පිටුව</a>
+            </div>
+        </header>
+
+        <div class="admin-panel">
+            <div id="alertContainer"></div>
+
+            <!-- Business Name Section -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; margin-bottom: 30px; color: white;">
+                <h3 style="margin-bottom: 20px; font-size: 1.3rem;">🏢 ව්‍යාපාර නාමය</h3>
+                <div class="form-group">
+                    <label for="businessName" style="color: white;">ව්‍යාපාරයේ නම</label>
+                    <input type="text" id="businessName" placeholder="උදා: Sana Store" style="background: white;">
+                </div>
+                <button onclick="updateBusinessName()" class="btn" style="background: white; color: #667eea; font-weight: bold;">
+                    💾 ව්‍යාපාර නාමය යාවත්කාලීන කරන්න
+                </button>
+                <p style="margin-top: 15px; font-size: 0.9rem; opacity: 0.9;">
+                    ℹ️ මෙය මුල් පිටුවේ ශීර්ෂය වෙනස් කරනු ඇත
+                </p>
+            </div>
+
+            <h3 style="margin-bottom: 20px; color: #333;">📦 නිෂ්පාදනය එකතු කරන්න</h3>
+
+            <form id="productForm">
+                <div class="form-group">
+                    <label for="productName">නිෂ්පාදනයේ නම *</label>
+                    <input type="text" id="productName" required placeholder="උදා: Samsung Galaxy S23">
+                </div>
+
+                <div class="form-group">
+                    <label for="productPrice">මිල (රුපියල්) *</label>
+                    <input type="number" id="productPrice" required placeholder="උදා: 150000">
+                </div>
+
+                <div class="form-group">
+                    <label for="productImage">රූපයේ Link (URL)</label>
+                    <input type="url" id="productImage" placeholder="https://example.com/image.jpg">
+                    <img id="imagePreview" class="image-preview" alt="Preview">
+                </div>
+
+                <div class="form-group">
+                    <label for="productLink">නිෂ්පාදන Link *</label>
+                    <input type="url" id="productLink" required placeholder="https://example.com/product">
+                </div>
+
+                <div class="form-group">
+                    <label for="productDescription">විස්තරය</label>
+                    <textarea id="productDescription" placeholder="නිෂ්පාදනය පිළිබඳ විස්තර මෙහි ලියන්න..."></textarea>
+                </div>
+
+                <button type="submit" class="btn">➕ නිෂ්පාදනය එකතු කරන්න</button>
+            </form>
+
+            <div class="product-preview">
+                <h3>📦 දැනට ඇති නිෂ්පාදන</h3>
+                <div id="productsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDY2dVr2B2AN5nGCWZy-iNmYm19G2nkQnA",
+            authDomain: "sana-1c57d.firebaseapp.com",
+            databaseURL: "https://sana-1c57d-default-rtdb.firebaseio.com",
+            projectId: "sana-1c57d",
+            storageBucket: "sana-1c57d.firebasestorage.app",
+            messagingSenderId: "615159256634",
+            appId: "1:615159256634:web:797e59a5c2535140274703",
+            measurementId: "G-PCB2VFKYCL"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Load business name
+        const businessNameRef = ref(database, 'settings/businessName');
+        onValue(businessNameRef, (snapshot) => {
+            const businessName = snapshot.val() || 'Sana';
+            document.getElementById('businessName').value = businessName;
+            document.getElementById('businessNameDisplay').textContent = businessName;
+        });
+
+        // Update business name
+        window.updateBusinessName = function() {
+            const businessName = document.getElementById('businessName').value.trim();
+            if (!businessName) {
+                showAlert('❌ කරුණාකර ව්‍යාපාර නාමයක් ඇතුළත් කරන්න', 'error');
+                return;
+            }
+
+            const settingsRef = ref(database, 'settings/businessName');
+            
+            set(settingsRef, businessName)
+                .then(() => {
+                    showAlert('✅ ව්‍යාපාර නාමය සාර්ථකව යාවත්කාලීන කරන ලදී!', 'success');
+                })
+                .catch((error) => {
+                    showAlert('❌ දෝෂයක්: ' + error.message, 'error');
+                });
+        };
+
+        // Image preview
+        document.getElementById('productImage').addEventListener('input', (e) => {
+            const preview = document.getElementById('imagePreview');
+            if (e.target.value) {
+                preview.src = e.target.value;
+                preview.classList.add('show');
+                preview.onerror = () => {
+                    preview.classList.remove('show');
+                };
+            } else {
+                preview.classList.remove('show');
+            }
+        });
+
+        // Show alert
+        function showAlert(message, type = 'success') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            const container = document.getElementById('alertContainer');
+            container.innerHTML = '';
+            container.appendChild(alertDiv);
+
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Add product
+        document.getElementById('productForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const product = {
+                name: document.getElementById('productName').value,
+                price: document.getElementById('productPrice').value,
+                image: document.getElementById('productImage').value,
+                link: document.getElementById('productLink').value,
+                description: document.getElementById('productDescription').value,
+                timestamp: Date.now()
+            };
+
+            const productsRef = ref(database, 'products');
+            push(productsRef, product)
+                .then(() => {
+                    showAlert('✅ නිෂ්පාදනය සාර්ථකව එකතු කරන ලදී!', 'success');
+                    e.target.reset();
+                    document.getElementById('imagePreview').classList.remove('show');
+                })
+                .catch((error) => {
+                    showAlert('❌ දෝෂයක්: ' + error.message, 'error');
+                });
+        });
+
+        // Load and display products
+        const productsRef = ref(database, 'products');
+        onValue(productsRef, (snapshot) => {
+            const container = document.getElementById('productsList');
+            container.innerHTML = '';
+
+            const data = snapshot.val();
+            if (!data) {
+                container.innerHTML = '<p style="color: #999;">තවම නිෂ්පාදන එකතු කර නොමැත</p>';
+                return;
+            }
+
+            Object.keys(data).forEach(key => {
+                const product = data[key];
+                const card = document.createElement('div');
+                card.className = 'preview-card';
+                card.innerHTML = `
+                    <h4>${product.name}</h4>
+                    <p><strong>මිල:</strong> Rs. ${product.price}</p>
+                    ${product.description ? `<p><strong>විස්තරය:</strong> ${product.description}</p>` : ''}
+                    ${product.image ? `<p><strong>රූපය:</strong> <a href="${product.image}" target="_blank">බලන්න</a></p>` : ''}
+                    <p><strong>Link:</strong> <a href="${product.link}" target="_blank">අඩවියට යන්න</a></p>
+                    <button class="delete-btn" onclick="deleteProduct('${key}')">🗑️ මකන්න</button>
+                `;
+                container.appendChild(card);
+            });
+        });
+
+        // Delete product
+        window.deleteProduct = function(productId) {
+            if (confirm('ඔබට මෙම නිෂ්පාදනය මැකීමට අවශ්‍ය බව විශ්වාසද?')) {
+                const productRef = ref(database, `products/${productId}`);
+                remove(productRef)
+                    .then(() => {
+                        showAlert('✅ නිෂ්පාදනය සාර්ථකව මකා දමන ලදී!', 'success');
+                    })
+                    .catch((error) => {
+                        showAlert('❌ දෝෂයක්: ' + error.message, 'error');
+                    });
+            }
+        };
+    </script>
+</body>
+</html>
