@@ -213,6 +213,43 @@
             color: #333;
         }
 
+        .category-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .category-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            margin: 5px;
+            border: 2px solid #667eea;
+        }
+
+        .btn-delete-category {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .btn-delete-category:hover {
+            background: #e84118;
+        }
+
         .image-preview {
             max-width: 100%;
             max-height: 200px;
@@ -318,9 +355,35 @@
                 </p>
             </div>
 
+            <!-- Category Management Section -->
+            <div style="background: #f8f9fa; padding: 30px; border-radius: 15px; margin-bottom: 30px; border: 2px solid #667eea;">
+                <h3 style="margin-bottom: 20px; color: #667eea;">📁 Categories</h3>
+                
+                <div class="form-group">
+                    <label for="newCategory">නව Category එකක් එකතු කරන්න</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="newCategory" placeholder="උදා: Electronics, Clothing, Food" style="flex: 1;">
+                        <button onclick="addCategory()" class="btn" style="width: auto; padding: 10px 30px;">
+                            ➕ Add
+                        </button>
+                    </div>
+                </div>
+
+                <div id="categoriesList" style="margin-top: 20px;">
+                    <!-- Categories will be loaded here -->
+                </div>
+            </div>
+
             <h3 style="margin-bottom: 20px; color: #333;">📦 නිෂ්පාදනය එකතු කරන්න</h3>
 
             <form id="productForm">
+                <div class="form-group">
+                    <label for="productCategory">Category *</label>
+                    <select id="productCategory" required style="width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem;">
+                        <option value="">-- Category එකක් තෝරන්න --</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label for="productName">නිෂ්පාදනයේ නම *</label>
                     <input type="text" id="productName" required placeholder="උදා: Samsung Galaxy S23">
@@ -335,11 +398,6 @@
                     <label for="productImage">රූපයේ Link (URL)</label>
                     <input type="url" id="productImage" placeholder="https://example.com/image.jpg">
                     <img id="imagePreview" class="image-preview" alt="Preview">
-                </div>
-
-                <div class="form-group">
-                    <label for="productLink">නිෂ්පාදන Link *</label>
-                    <input type="url" id="productLink" required placeholder="https://example.com/product">
                 </div>
 
                 <div class="form-group">
@@ -380,6 +438,92 @@
 
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+
+        let categories = [];
+
+        // Load categories
+        const categoriesRef = ref(database, 'categories');
+        onValue(categoriesRef, (snapshot) => {
+            const data = snapshot.val();
+            categories = data ? Object.keys(data).map(key => ({ id: key, name: data[key] })) : [];
+            updateCategoriesDisplay();
+            updateCategoryDropdown();
+        });
+
+        // Update categories display
+        function updateCategoriesDisplay() {
+            const container = document.getElementById('categoriesList');
+            if (categories.length === 0) {
+                container.innerHTML = '<p style="color: #999;">තවම categories නැත</p>';
+                return;
+            }
+
+            container.innerHTML = categories.map(cat => `
+                <div class="category-item">
+                    <span>${cat.name}</span>
+                    <button class="btn-delete-category" onclick="deleteCategory('${cat.id}')">×</button>
+                </div>
+            `).join('');
+        }
+
+        // Update category dropdown
+        function updateCategoryDropdown() {
+            const select = document.getElementById('productCategory');
+            const currentValue = select.value;
+            
+            select.innerHTML = '<option value="">-- Category එකක් තෝරන්න --</option>';
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.name;
+                option.textContent = cat.name;
+                select.appendChild(option);
+            });
+
+            if (currentValue) {
+                select.value = currentValue;
+            }
+        }
+
+        // Add category
+        window.addCategory = function() {
+            const categoryInput = document.getElementById('newCategory');
+            const categoryName = categoryInput.value.trim();
+
+            if (!categoryName) {
+                showAlert('❌ කරුණාකර category නමක් ඇතුළත් කරන්න', 'error');
+                return;
+            }
+
+            // Check if category already exists
+            if (categories.some(cat => cat.name.toLowerCase() === categoryName.toLowerCase())) {
+                showAlert('❌ මෙම category එක දැනටමත් තිබේ', 'error');
+                return;
+            }
+
+            const newCategoryRef = push(categoriesRef);
+            set(newCategoryRef, categoryName)
+                .then(() => {
+                    showAlert('✅ Category එක සාර්ථකව එකතු කරන ලදී!', 'success');
+                    categoryInput.value = '';
+                })
+                .catch((error) => {
+                    showAlert('❌ දෝෂයක්: ' + error.message, 'error');
+                });
+        };
+
+        // Delete category
+        window.deleteCategory = function(categoryId) {
+            if (confirm('ඔබට මෙම category එක මැකීමට අවශ්‍ය බව විශ්වාසද?')) {
+                const categoryRef = ref(database, `categories/${categoryId}`);
+                remove(categoryRef)
+                    .then(() => {
+                        showAlert('✅ Category එක සාර්ථකව මකා දමන ලදී!', 'success');
+                    })
+                    .catch((error) => {
+                        showAlert('❌ දෝෂයක්: ' + error.message, 'error');
+                    });
+            }
+        };
 
         // Load business name
         const businessNameRef = ref(database, 'settings/businessName');
@@ -441,11 +585,17 @@
         document.getElementById('productForm').addEventListener('submit', (e) => {
             e.preventDefault();
 
+            const category = document.getElementById('productCategory').value;
+            if (!category) {
+                showAlert('❌ කරුණාකර category එකක් තෝරන්න', 'error');
+                return;
+            }
+
             const product = {
+                category: category,
                 name: document.getElementById('productName').value,
                 price: document.getElementById('productPrice').value,
                 image: document.getElementById('productImage').value,
-                link: document.getElementById('productLink').value,
                 description: document.getElementById('productDescription').value,
                 timestamp: Date.now()
             };
@@ -479,11 +629,11 @@
                 const card = document.createElement('div');
                 card.className = 'preview-card';
                 card.innerHTML = `
+                    ${product.category ? `<span class="category-badge">${product.category}</span>` : ''}
                     <h4>${product.name}</h4>
                     <p><strong>මිල:</strong> Rs. ${product.price}</p>
                     ${product.description ? `<p><strong>විස්තරය:</strong> ${product.description}</p>` : ''}
                     ${product.image ? `<p><strong>රූපය:</strong> <a href="${product.image}" target="_blank">බලන්න</a></p>` : ''}
-                    <p><strong>Link:</strong> <a href="${product.link}" target="_blank">අඩවියට යන්න</a></p>
                     <button class="delete-btn" onclick="deleteProduct('${key}')">🗑️ මකන්න</button>
                 `;
                 container.appendChild(card);
