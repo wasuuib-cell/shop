@@ -552,15 +552,27 @@
                 <!-- Business Name Section -->
                 <div class="settings-card">
                     <div class="settings-card-header">
-                        <h4>🏢 ව්‍යාපාර නාමය</h4>
-                        <p>ඔබේ වෙළඳසැල්ගේ නම සකසන්න</p>
+                        <h4>🏢 ව්‍යාපාර තොරතුරු</h4>
+                        <p>ඔබේ වෙළඳසැල්ගේ නම සහ logo සකසන්න</p>
                     </div>
                     <div class="settings-card-body">
                         <div class="form-group">
                             <label for="businessName">වෙළඳසැල් නම</label>
                             <input type="text" id="businessName" placeholder="උදා: Sana Fashion Store">
                         </div>
-                        <button onclick="updateBusinessName()" class="btn-save">
+
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label for="businessLogo">Logo URL (Optional)</label>
+                            <input type="url" id="businessLogoUrl" placeholder="https://example.com/logo.png">
+                            <div id="logoPreviewContainer" style="margin-top: 15px; padding: 20px; background: #f8f9fa; border-radius: 10px; text-align: center; display: none;">
+                                <img id="logoPreview" src="" alt="Logo Preview" style="max-height: 100px; max-width: 200px; object-fit: contain;">
+                            </div>
+                            <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">
+                                💡 Logo එකක් add කළාම emoji icon එක auto එකක් remove වෙනවා
+                            </p>
+                        </div>
+
+                        <button onclick="updateBusinessInfo()" class="btn-save">
                             💾 සුරකින්න
                         </button>
                     </div>
@@ -947,23 +959,62 @@
             document.getElementById('businessNameDisplay').textContent = businessName;
         });
 
-        // Update business name
-        window.updateBusinessName = function() {
+        // Load business logo
+        const logoRef = ref(database, 'settings/logo');
+        onValue(logoRef, (snapshot) => {
+            const logoUrl = snapshot.val();
+            if (logoUrl) {
+                document.getElementById('businessLogoUrl').value = logoUrl;
+                document.getElementById('logoPreview').src = logoUrl;
+                document.getElementById('logoPreviewContainer').style.display = 'block';
+            }
+        });
+
+        // Logo preview on input
+        document.getElementById('businessLogoUrl').addEventListener('input', (e) => {
+            const url = e.target.value;
+            const preview = document.getElementById('logoPreview');
+            const container = document.getElementById('logoPreviewContainer');
+            
+            if (url) {
+                preview.src = url;
+                container.style.display = 'block';
+                preview.onerror = () => {
+                    container.style.display = 'none';
+                };
+            } else {
+                container.style.display = 'none';
+            }
+        });
+
+        // Update business info (name + logo)
+        window.updateBusinessInfo = function() {
             const businessName = document.getElementById('businessName').value.trim();
+            const logoUrl = document.getElementById('businessLogoUrl').value.trim();
+
             if (!businessName) {
                 showAlert('❌ කරුණාකර ව්‍යාපාර නාමයක් ඇතුළත් කරන්න', 'error');
                 return;
             }
 
-            const settingsRef = ref(database, 'settings/businessName');
-            
-            set(settingsRef, businessName)
+            // Save business name
+            const nameRef = ref(database, 'settings/businessName');
+            set(nameRef, businessName);
+
+            // Save logo URL
+            const logoRef = ref(database, 'settings/logo');
+            set(logoRef, logoUrl)
                 .then(() => {
-                    showAlert('✅ ව්‍යාපාර නාමය සාර්ථකව යාවත්කාලීන කරන ලදී!', 'success');
+                    showAlert('✅ ව්‍යාපාර තොරතුරු සාර්ථකව යාවත්කාලීන කරන ලදී!', 'success');
                 })
                 .catch((error) => {
                     showAlert('❌ දෝෂයක්: ' + error.message, 'error');
                 });
+        };
+
+        // Update business name (old function - keeping for compatibility)
+        window.updateBusinessName = function() {
+            updateBusinessInfo();
         };
 
         // Color picker live update
