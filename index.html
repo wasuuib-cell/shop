@@ -453,8 +453,10 @@
 <body>
     <div class="container">
         <header>
-            <h1 id="businessTitle">🛍️ Sana</h1>
-            <p>අපගේ නවතම නිෂ්පාදන</p>
+            <div id="logoContainer" style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px;">
+                <img id="businessLogo" src="" alt="" style="display: none; max-height: 80px; max-width: 150px; object-fit: contain;">
+                <h1 id="businessTitle" style="display: none;">Sana</h1>
+            </div>
             
             <div class="user-bar" id="userBar">
                 <!-- Dynamic content loaded by JavaScript -->
@@ -590,12 +592,53 @@
             displayProducts();
         };
 
-        // Load business name
+        // Load business name and logo
         const businessNameRef = ref(database, 'settings/businessName');
+        const logoRef = ref(database, 'settings/logo');
+        
+        let businessName = '';
+        let logoUrl = '';
+
+        // Load business name
         onValue(businessNameRef, (snapshot) => {
-            const businessName = snapshot.val() || 'Sana';
-            document.getElementById('businessTitle').innerHTML = `🛍️ ${businessName}`;
+            businessName = snapshot.val() || '';
+            updateHeader();
         });
+
+        // Load business logo
+        onValue(logoRef, (snapshot) => {
+            logoUrl = snapshot.val() || '';
+            updateHeader();
+        });
+
+        // Update header based on available data
+        function updateHeader() {
+            const titleElement = document.getElementById('businessTitle');
+            const logoElement = document.getElementById('businessLogo');
+            
+            if (logoUrl) {
+                // Logo එක තියෙනවා නම්
+                logoElement.src = logoUrl;
+                logoElement.style.display = 'block';
+                
+                if (businessName) {
+                    titleElement.textContent = businessName;
+                    titleElement.style.display = 'block';
+                } else {
+                    titleElement.style.display = 'none';
+                }
+            } else {
+                // Logo එක නැති නම්
+                logoElement.style.display = 'none';
+                
+                if (businessName) {
+                    titleElement.textContent = businessName;
+                    titleElement.style.display = 'block';
+                } else {
+                    titleElement.style.display = 'none';
+                }
+            }
+        }
 
         // Load and apply theme settings
         const themeRef = ref(database, 'settings/theme');
