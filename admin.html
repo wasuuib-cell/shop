@@ -39,9 +39,64 @@
         .admin-panel {
             background: white;
             border-radius: 20px;
-            padding: 40px;
+            padding: 0;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             animation: fadeInUp 0.8s ease;
+            overflow: hidden;
+        }
+
+        .tabs-container {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 20px 15px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            min-width: 150px;
+        }
+
+        .tab-button:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 40px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .form-group {
@@ -324,6 +379,21 @@
             header h1 {
                 font-size: 2rem;
             }
+
+            .tabs-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .tab-button {
+                min-width: 120px;
+                padding: 15px 10px;
+                font-size: 0.9rem;
+            }
+
+            .tab-content {
+                padding: 20px;
+            }
         }
     </style>
 </head>
@@ -338,83 +408,118 @@
         </header>
 
         <div class="admin-panel">
-            <div id="alertContainer"></div>
+            <div id="alertContainer" style="padding: 20px; padding-bottom: 0;"></div>
 
-            <!-- Business Name Section -->
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; margin-bottom: 30px; color: white;">
-                <h3 style="margin-bottom: 20px; font-size: 1.3rem;">🏢 ව්‍යාපාර නාමය</h3>
-                <div class="form-group">
-                    <label for="businessName" style="color: white;">ව්‍යාපාරයේ නම</label>
-                    <input type="text" id="businessName" placeholder="උදා: Sana Store" style="background: white;">
-                </div>
-                <button onclick="updateBusinessName()" class="btn" style="background: white; color: #667eea; font-weight: bold;">
-                    💾 ව්‍යාපාර නාමය යාවත්කාලීන කරන්න
+            <!-- Tabs Navigation -->
+            <div class="tabs-container">
+                <button class="tab-button active" onclick="switchTab('settings', event)">
+                    🏢 සැකසුම්
                 </button>
-                <p style="margin-top: 15px; font-size: 0.9rem; opacity: 0.9;">
-                    ℹ️ මෙය මුල් පිටුවේ ශීර්ෂය වෙනස් කරනු ඇත
-                </p>
+                <button class="tab-button" onclick="switchTab('categories', event)">
+                    📁 Categories
+                </button>
+                <button class="tab-button" onclick="switchTab('products', event)">
+                    📦 නිෂ්පාදන
+                </button>
+                <button class="tab-button" onclick="switchTab('orders', event)">
+                    📋 Orders
+                </button>
             </div>
 
-            <!-- Category Management Section -->
-            <div style="background: #f8f9fa; padding: 30px; border-radius: 15px; margin-bottom: 30px; border: 2px solid #667eea;">
-                <h3 style="margin-bottom: 20px; color: #667eea;">📁 Categories</h3>
+            <!-- Settings Tab -->
+            <div id="settingsTab" class="tab-content active">
+                <h3 style="margin-bottom: 30px; color: #667eea; font-size: 1.8rem;">🏢 ව්‍යාපාර සැකසුම්</h3>
                 
-                <div class="form-group">
-                    <label for="newCategory">නව Category එකක් එකතු කරන්න</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="newCategory" placeholder="උදා: Electronics, Clothing, Food" style="flex: 1;">
-                        <button onclick="addCategory()" class="btn" style="width: auto; padding: 10px 30px;">
-                            ➕ Add
-                        </button>
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; color: white;">
+                    <h4 style="margin-bottom: 20px; font-size: 1.3rem;">ව්‍යාපාර නාමය</h4>
+                    <div class="form-group">
+                        <label for="businessName" style="color: white;">ව්‍යාපාරයේ නම</label>
+                        <input type="text" id="businessName" placeholder="උදා: Sana Store" style="background: white;">
+                    </div>
+                    <button onclick="updateBusinessName()" class="btn" style="background: white; color: #667eea; font-weight: bold;">
+                        💾 යාවත්කාලීන කරන්න
+                    </button>
+                    <p style="margin-top: 15px; font-size: 0.9rem; opacity: 0.9;">
+                        ℹ️ මෙය මුල් පිටුවේ ශීර්ෂය වෙනස් කරනු ඇත
+                    </p>
+                </div>
+            </div>
+
+            <!-- Categories Tab -->
+            <div id="categoriesTab" class="tab-content">
+                <h3 style="margin-bottom: 30px; color: #667eea; font-size: 1.8rem;">📁 Categories කළමනාකරණය</h3>
+                
+                <div style="background: #f8f9fa; padding: 30px; border-radius: 15px; border: 2px solid #667eea;">
+                    <h4 style="margin-bottom: 20px; color: #667eea;">නව Category එකක් එකතු කරන්න</h4>
+                    
+                    <div class="form-group">
+                        <label for="newCategory">Category නම</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="newCategory" placeholder="උදා: Electronics, Clothing, Food" style="flex: 1;">
+                            <button onclick="addCategory()" class="btn" style="width: auto; padding: 10px 30px;">
+                                ➕ Add
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <h4 style="margin-bottom: 15px; color: #333;">ඇති Categories:</h4>
+                        <div id="categoriesList">
+                            <!-- Categories will be loaded here -->
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div id="categoriesList" style="margin-top: 20px;">
-                    <!-- Categories will be loaded here -->
+            <!-- Products Tab -->
+            <div id="productsTab" class="tab-content">
+                <h3 style="margin-bottom: 30px; color: #667eea; font-size: 1.8rem;">📦 නිෂ්පාදන කළමනාකරණය</h3>
+
+                <div style="background: #f8f9fa; padding: 30px; border-radius: 15px; margin-bottom: 40px;">
+                    <h4 style="margin-bottom: 20px; color: #667eea;">නව නිෂ්පාදනයක් එකතු කරන්න</h4>
+
+                    <form id="productForm">
+                        <div class="form-group">
+                            <label for="productCategory">Category *</label>
+                            <select id="productCategory" required style="width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem;">
+                                <option value="">-- Category එකක් තෝරන්න --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="productName">නිෂ්පාදනයේ නම *</label>
+                            <input type="text" id="productName" required placeholder="උදා: Samsung Galaxy S23">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="productPrice">මිල (රුපියල්) *</label>
+                            <input type="number" id="productPrice" required placeholder="උදා: 150000">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="productImage">රූපයේ Link (URL)</label>
+                            <input type="url" id="productImage" placeholder="https://example.com/image.jpg">
+                            <img id="imagePreview" class="image-preview" alt="Preview">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="productDescription">විස්තරය</label>
+                            <textarea id="productDescription" placeholder="නිෂ්පාදනය පිළිබඳ විස්තර මෙහි ලියන්න..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn">➕ නිෂ්පාදනය එකතු කරන්න</button>
+                    </form>
+                </div>
+
+                <div>
+                    <h4 style="margin-bottom: 20px; color: #333; font-size: 1.3rem;">දැනට ඇති නිෂ්පාදන:</h4>
+                    <div id="productsList"></div>
                 </div>
             </div>
 
-            <h3 style="margin-bottom: 20px; color: #333;">📦 නිෂ්පාදනය එකතු කරන්න</h3>
-
-            <form id="productForm">
-                <div class="form-group">
-                    <label for="productCategory">Category *</label>
-                    <select id="productCategory" required style="width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem;">
-                        <option value="">-- Category එකක් තෝරන්න --</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="productName">නිෂ්පාදනයේ නම *</label>
-                    <input type="text" id="productName" required placeholder="උදා: Samsung Galaxy S23">
-                </div>
-
-                <div class="form-group">
-                    <label for="productPrice">මිල (රුපියල්) *</label>
-                    <input type="number" id="productPrice" required placeholder="උදා: 150000">
-                </div>
-
-                <div class="form-group">
-                    <label for="productImage">රූපයේ Link (URL)</label>
-                    <input type="url" id="productImage" placeholder="https://example.com/image.jpg">
-                    <img id="imagePreview" class="image-preview" alt="Preview">
-                </div>
-
-                <div class="form-group">
-                    <label for="productDescription">විස්තරය</label>
-                    <textarea id="productDescription" placeholder="නිෂ්පාදනය පිළිබඳ විස්තර මෙහි ලියන්න..."></textarea>
-                </div>
-
-                <button type="submit" class="btn">➕ නිෂ්පාදනය එකතු කරන්න</button>
-            </form>
-
-            <div class="product-preview">
-                <h3>📦 දැනට ඇති නිෂ්පාදන</h3>
-                <div id="productsList"></div>
-            </div>
-
-            <div class="product-preview" style="margin-top: 40px;">
-                <h3>📋 පාරිභෝගික Orders</h3>
+            <!-- Orders Tab -->
+            <div id="ordersTab" class="tab-content">
+                <h3 style="margin-bottom: 30px; color: #667eea; font-size: 1.8rem;">📋 පාරිභෝගික Orders</h3>
                 <div id="ordersList"></div>
             </div>
         </div>
@@ -440,6 +545,36 @@
         const database = getDatabase(app);
 
         let categories = [];
+
+        // Tab switching function
+        window.switchTab = function(tabName, event) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // Show selected tab content
+            document.getElementById(tabName + 'Tab').classList.add('active');
+
+            // Add active class to clicked button
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // Fallback: find button by tab name
+                const buttons = document.querySelectorAll('.tab-button');
+                buttons.forEach((btn, index) => {
+                    const tabNames = ['settings', 'categories', 'products', 'orders'];
+                    if (tabNames[index] === tabName) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+        };
 
         // Load categories
         const categoriesRef = ref(database, 'categories');
