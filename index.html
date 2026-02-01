@@ -198,28 +198,11 @@
             text-align: center;
             margin: 20px 0;
             color: #999;
+            display: none;
         }
 
         .btn-google {
-            width: 100%;
-            padding: 15px;
-            background: white;
-            color: #333;
-            border: 2px solid #e0e0e0;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .btn-google:hover {
-            border-color: #667eea;
-            background: #f8f9fa;
+            display: none;
         }
 
         /* Products Grid */
@@ -371,6 +354,30 @@
             color: #999;
         }
 
+        .category-tab {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 12px 30px;
+            border: 2px solid white;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .category-tab:hover {
+            background: white;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .category-tab.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+        }
+
         .loading {
             text-align: center;
             color: white;
@@ -459,6 +466,10 @@
             <p>නිෂ්පාදන පූර්ණය වෙමින්...</p>
         </div>
 
+        <div id="categoryTabs" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 30px;">
+            <!-- Categories will be loaded here -->
+        </div>
+
         <div id="productsContainer" class="products-grid"></div>
     </div>
 
@@ -493,18 +504,6 @@
                 
                 <button type="submit" class="btn-primary">Login</button>
             </form>
-            
-            <div class="divider">හෝ</div>
-            
-            <button class="btn-google" onclick="loginWithGoogle()">
-                <svg width="20" height="20" viewBox="0 0 20 20">
-                    <path fill="#4285F4" d="M19.6 10.23c0-.82-.1-1.42-.25-2.05H10v3.72h5.5c-.15.96-.74 2.31-2.04 3.22v2.45h3.16c1.89-1.73 2.98-4.3 2.98-7.34z"/>
-                    <path fill="#34A853" d="M13.46 15.13c-.83.59-1.96 1-3.46 1-2.64 0-4.88-1.74-5.68-4.15H1.07v2.52C2.72 17.75 6.09 20 10 20c2.7 0 4.96-.89 6.62-2.42l-3.16-2.45z"/>
-                    <path fill="#FBBC05" d="M3.99 10c0-.69.12-1.35.32-1.97V5.51H1.07A9.973 9.973 0 000 10c0 1.61.39 3.14 1.07 4.49l3.24-2.52c-.2-.62-.32-1.28-.32-1.97z"/>
-                    <path fill="#EA4335" d="M10 3.88c1.88 0 3.13.81 3.85 1.48l2.84-2.76C14.96.99 12.7 0 10 0 6.09 0 2.72 2.25 1.07 5.51l3.24 2.52C5.12 5.62 7.36 3.88 10 3.88z"/>
-                </svg>
-                Google එකින් Login වන්න
-            </button>
         </div>
     </div>
 
@@ -553,6 +552,43 @@
         let currentUser = null;
         let cart = [];
         let products = {};
+        let categories = [];
+        let selectedCategory = 'All';
+
+        // Load categories
+        const categoriesRef = ref(database, 'categories');
+        onValue(categoriesRef, (snapshot) => {
+            const data = snapshot.val();
+            categories = data ? Object.values(data) : [];
+            updateCategoryTabs();
+        });
+
+        // Update category tabs
+        function updateCategoryTabs() {
+            const container = document.getElementById('categoryTabs');
+            
+            let html = '<button class="category-tab active" onclick="filterByCategory(\'All\')">All</button>';
+            categories.forEach(category => {
+                html += `<button class="category-tab" onclick="filterByCategory('${category}')">${category}</button>`;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Filter by category
+        window.filterByCategory = function(category) {
+            selectedCategory = category;
+            
+            // Update active tab
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.textContent === category) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            displayProducts();
+        };
 
         // Load business name
         const businessNameRef = ref(database, 'settings/businessName');
@@ -600,18 +636,6 @@
 
         window.closeLoginModal = function() {
             document.getElementById('loginModal').classList.remove('active');
-        };
-
-        window.loginWithGoogle = async function() {
-            const provider = new GoogleAuthProvider();
-            try {
-                const result = await signInWithPopup(auth, provider);
-                currentUser = result.user;
-                closeLoginModal();
-                alert('✅ Successfully logged in!');
-            } catch (error) {
-                alert('❌ Login failed: ' + error.message);
-            }
         };
 
         window.logout = async function() {
@@ -744,21 +768,40 @@
         const productsRef = ref(database, 'products');
         onValue(productsRef, (snapshot) => {
             const loadingDiv = document.getElementById('loading');
-            const container = document.getElementById('productsContainer');
-            
             loadingDiv.style.display = 'none';
-            container.innerHTML = '';
 
             const data = snapshot.val();
             products = data || {};
 
-            if (!data || Object.keys(data).length === 0) {
+            displayProducts();
+        });
+
+        // Display products based on selected category
+        function displayProducts() {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = '';
+
+            if (!products || Object.keys(products).length === 0) {
                 container.innerHTML = '<div style="text-align: center; color: white; padding: 40px;">තවම නිෂ්පාදන එකතු කර නොමැත</div>';
                 return;
             }
 
-            Object.keys(data).forEach((key, index) => {
-                const product = data[key];
+            let filteredProducts = Object.keys(products);
+            
+            // Filter by category
+            if (selectedCategory !== 'All') {
+                filteredProducts = filteredProducts.filter(key => 
+                    products[key].category === selectedCategory
+                );
+            }
+
+            if (filteredProducts.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: white; padding: 40px;">මෙම category එකේ නිෂ්පාදන නැත</div>';
+                return;
+            }
+
+            filteredProducts.forEach((key, index) => {
+                const product = products[key];
                 const card = document.createElement('div');
                 card.className = 'product-card';
                 card.style.animationDelay = `${index * 0.1}s`;
@@ -773,6 +816,7 @@
                         ${imageHtml}
                     </div>
                     <div class="product-info">
+                        ${product.category ? `<div style="color: #667eea; font-weight: 600; font-size: 0.9rem; margin-bottom: 5px;">📁 ${product.category}</div>` : ''}
                         <h2 class="product-name">${product.name || 'නම නැත'}</h2>
                         <div class="product-price">Rs. ${product.price || '0'}</div>
                         ${product.description ? `<p class="product-description">${product.description}</p>` : ''}
@@ -784,7 +828,7 @@
 
                 container.appendChild(card);
             });
-        });
+        }
 
         function getImageUrl(image) {
             if (!image) return '';
