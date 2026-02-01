@@ -597,6 +597,68 @@
             document.getElementById('businessTitle').innerHTML = `🛍️ ${businessName}`;
         });
 
+        // Load and apply theme settings
+        const themeRef = ref(database, 'settings/theme');
+        onValue(themeRef, (snapshot) => {
+            const theme = snapshot.val();
+            if (theme) {
+                const root = document.documentElement;
+                root.style.setProperty('--primary-color', theme.primaryColor);
+                root.style.setProperty('--secondary-color', theme.secondaryColor);
+                
+                // Update background gradient
+                document.body.style.background = `linear-gradient(135deg, ${theme.primaryColor} 0%, ${theme.secondaryColor} 100%)`;
+            }
+        });
+
+        // Load and apply font settings
+        const fontRef = ref(database, 'settings/font');
+        onValue(fontRef, (snapshot) => {
+            const fontSettings = snapshot.val();
+            if (fontSettings) {
+                document.body.style.fontFamily = fontSettings.fontFamily;
+                document.body.style.fontSize = fontSettings.fontSize;
+                document.body.style.fontWeight = fontSettings.fontWeight;
+            }
+        });
+
+        // Load and apply layout settings
+        const layoutRef = ref(database, 'settings/layout');
+        onValue(layoutRef, (snapshot) => {
+            const layoutSettings = snapshot.val();
+            if (layoutSettings) {
+                const cards = document.querySelectorAll('.product-card');
+                cards.forEach(card => {
+                    // Apply card style
+                    switch(layoutSettings.cardStyle) {
+                        case 'square':
+                            card.style.borderRadius = '5px';
+                            break;
+                        case 'extra-rounded':
+                            card.style.borderRadius = '30px';
+                            break;
+                        default:
+                            card.style.borderRadius = '20px';
+                    }
+                    
+                    // Apply shadow
+                    switch(layoutSettings.cardShadow) {
+                        case 'light':
+                            card.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                            break;
+                        case 'heavy':
+                            card.style.boxShadow = '0 15px 40px rgba(0,0,0,0.3)';
+                            break;
+                        case 'none':
+                            card.style.boxShadow = 'none';
+                            break;
+                        default:
+                            card.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
+                    }
+                });
+            }
+        });
+
         // Auth state observer
         onAuthStateChanged(auth, (user) => {
             if (user) {
